@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>${title}</title>
+	<style>
+		summary {
+			display: block;
+			cursor: pointer;
+			outline: 0;
+		}
+
+		summary::-webkit-details-marker {
+			display: none;
+		}
+
+		body {
+			background-color: #c6dbe9;
+			color: rgb(0, 0, 0);
+			font-family: arial;
+			margin: 0;
+			padding: 3rem;
+		}
+
+		.tree-nav__item {
+			display: block;
+			white-space: nowrap;
+			color: #000000;
+			position: relative;
+		}
+
+		.tree-nav__item.is-expandable::before {
+			border-left: 1px solid #333;
+			content: "";
+			height: 100%;
+			left: 0.8rem;
+			position: absolute;
+			top: 2.4rem;
+			height: calc(100% - 2.4rem);
+		}
+
+		.tree-nav__item .tree-nav__item {
+			margin-left: 2.4rem;
+		}
+
+		.tree-nav__item.is-expandable[open]>.tree-nav__item-title::before {
+			transform: rotate(90deg);
+		}
+
+		.tree-nav__item.is-expandable>.tree-nav__item-title {
+			padding-left: 2.4rem;
+		}
+
+		.tree-nav__item.is-expandable>.tree-nav__item-title::before {
+			position: absolute;
+			will-change: transform;
+			transition: transform 300ms ease;
+			color: #000000;
+			content: "▶";
+			left: 0;
+			display: inline-block;
+			width: 1.6rem;
+			text-align: center;
+		}
+
+		.tree-nav__item-title {
+			cursor: pointer;
+			display: block;
+			outline: 0;
+			color: #000000;
+			line-height: 3.2rem;
+		}
+
+		.tree-nav__item-title .icon {
+			display: inline;
+			padding-left: 1.6rem;
+			margin-right: 0.8rem;
+			color: #666;
+			position: relative;
+		}
+
+		.tree-nav__item-title .icon::before {
+			top: 0;
+			position: absolute;
+			left: 0;
+			display: inline-block;
+			width: 1.6rem;
+			text-align: center;
+		}
+
+		.tree-nav__item-title::-webkit-details-marker {
+			display: none;
+		}
+
+		th,
+		td {
+			padding: 5px;
+		}
+
+		tr:nth-child(odd) {
+			background-color: #8baabe;
+		}
+
+		.success {
+			color: darkgreen;
+		}
+
+		.failed {
+			color: darkred;
+		}
+
+		.skipped {
+			color: rgb(145, 61, 0);
+		}
+
+		.tooltip {
+			display: inline-block;
+			position: relative;
+			border-bottom: 1px dotted #666;
+			text-align: left;
+		}
+
+		.tooltip .right {
+			min-width: 400px;
+			max-width: 500px;
+			top: 50%;
+			left: 100%;
+			margin-left: 20px;
+			transform: translate(0, -50%);
+			padding: 10px 20px;
+			color: #000000;
+			background-color: #FFFF66;
+			font-weight: normal;
+			font-size: 13px;
+			border-radius: 8px;
+			position: absolute;
+			z-index: 99999999;
+			box-sizing: border-box;
+			border: 1px solid #000000;
+			box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+			display: none;
+			word-break: break-all;
+			white-space: normal;
+		}
+
+		.tooltip:hover .right {
+			display: block;
+		}
+
+		.tooltip .right i {
+			position: absolute;
+			top: 50%;
+			right: 100%;
+			margin-top: -12px;
+			width: 12px;
+			height: 24px;
+			overflow: hidden;
+		}
+
+		.tooltip .right i::after {
+			content: '';
+			position: absolute;
+			width: 12px;
+			height: 12px;
+			left: 0;
+			top: 50%;
+			transform: translate(50%, -50%) rotate(-45deg);
+			background-color: #FFFF66;
+			border: 1px solid #000000;
+			box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+		}
+	</style>
+	<script>
+		window.console = window.console || function (t) { };
+	</script>
+	<script>
+		if (document.location.search.match(/type=embed/gi)) {
+			window.parent.postMessage("resize", "*");
+		}
+	</script>
+</head>
+
+<body>
+	<h1>${title} <img src="images/honey-311047.png" /></h1>
+	${htmlFailed}
+	<h2>Summary of Test Execution</h2>
+	<h4>Test Start .... ${testStart}</h4>
+	<h4>Test End ...... ${testEnd}</h4>
+	<h4>Duration ...... ${duration}</h4>
+	<table style="width:50%; text-align:left;">
+		<tr>
+			<th>Category</th>
+			<th>Count</th>
+		</tr>
+		<tr>
+			<td><span class="success">✓</span> Success</td>
+			<td>${successCount}</td>
+		</tr>
+		<tr>
+			<td><span class="failed">✗</span> Failed</td>
+			<td>${failedCount}</td>
+		</tr>
+		<tr>
+			<td><span class="skipped">↷</span> Skipped</td>
+			<td>${skippedCount}</td>
+		</tr>
+		<tr>
+			<td>∑ Total</td>
+			<td>${totalCount}</td>
+		</tr>
+	</table>
+	<hr>
+	<h2>Details of Test Execution</h2>
+	<details class="tree-nav__item is-expandable" open>
+		<summary class="tree-nav__item-title">${testStart}</summary>
+		<details class="tree-nav__item is-expandable">
+			<summary class="tree-nav__item-title">Vars</summary>
+			<div class="tree-nav__item">
+				<table style="width:60%; text-align:left;">
+					<tr>
+						<th>Number</th>
+						<th>Name</th>
+						<th>Value</th>
+					</tr>
+					${htmlVars}
+				</table>
+			</div>
+		</details>
+		<details class="tree-nav__item is-expandable">
+			<summary class="tree-nav__item-title">Prerequisites</summary>
+			<div class="tree-nav__item">
+				<table style="width:60%; text-align:left;">
+					<tr>
+						<th>Number</th>
+						<th>Result</th>
+						<th>Timestamp</th>
+						<th>Description</th>
+					</tr>
+					${htmlPreReqs}
+				</table>
+			</div>
+		</details>
+		<details class="tree-nav__item is-expandable" open>
+			<summary class="tree-nav__item-title">Test Runs</summary>
+			<div class="tree-nav__item">
+				<table style="width:60%; text-align:left;">
+					<tr>
+						<th>Number</th>
+						<th>Name</th>
+						<th>Result</th>
+						<th>Timestamp</th>
+						<th>Description</th>
+					</tr>
+					${htmlCases}
+				</table>
+			</div>
+		</details>
+	</details>
+</body>
+
+</html>

@@ -1,0 +1,23 @@
+{
+	"tests": {
+		"name": "BUnit Demo Tests",
+		"cases": [
+			{
+				"number": "DUM1",
+				"description": "Dummy-Test 1 successful",
+				"command": "echo hello world",
+				"exitCode": 0
+			},
+			{
+				"number": "DUM2",
+				"description": "Dummy-Test 2 fails",
+				"command": "echo \"This is an example error message send to stderr\" >&2 ; false",
+				"exitCode": 0
+			},
+			{
+				"number": "DUM3",
+				"description": "Dummy-Test 3 skipped"
+			}
+		]
+	}
+}
