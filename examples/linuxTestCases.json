@@ -1,10 +1,16 @@
 {
 	"tests": {
 		"name": "Linux Tests",
+		"vars": [
+			{
+				"name": "dirpattern",
+				"value": "bunit"
+			}
+		],
 		"prerequisites": [
 			{
 				"description": "Create temp dir",
-				"command": "export tmpDir=$(mktemp -d -t bunit)"
+				"command": "export tmpDir=$(mktemp -d -t $dirpattern)"
 			}
 		],
 		"cases": [
