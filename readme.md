@@ -276,10 +276,10 @@ The test script generates various artifacts and reports on each run:
 - details of the test cases and their execution
 - all variables with their name and value
 - a JSON file for each test case
-- the pre-requisite commands and their outputs (stdout and stder)
-- setup commands of the test cases and their outputs (stdout and stder) if available
-- the test commands of the test cases and their outputs (stdout and stder)
-- teardown commands of the test cases and their outputs (stdout and stder) if available
+- the pre-requisite commands and their outputs (stdout and stderr)
+- setup commands of the test cases and their outputs (stdout and stderr) if available
+- the test commands of the test cases and their outputs (stdout and stderr)
+- teardown commands of the test cases and their outputs (stdout and stderr) if available
 - a zip file named with the timestamp of the execution, containing all the files mentioned above
 
 All files are written to a folder called "reports/latest".
@@ -290,7 +290,7 @@ The files "report.txt" and "report.html" contain the test results. The first fil
 
 In the subdirectory "cases" there is a JSON file for each test case. This can be helpful for the analysis.
 
-The folder "prereqs" contains files with the commands of the prerequisites and their outputs (stdout and stder). If there are problems, these files can help.
+The folder "prereqs" contains files with the commands of the prerequisites and their outputs (stdout and stderr). If there are problems, these files can help.
 
 The same git for the test execution. The folder "runs" contains files for the commands "setup", "teardown" and "command" and their outputs.
 
