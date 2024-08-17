@@ -3,7 +3,7 @@
 #################################################
 # Script to run test cases defined in a Json file
 # Author: Thorsten Reimers
-# Date: 17.05.2023
+# Date: 15.06.2024
 #################################################
 
 # print help
@@ -59,7 +59,7 @@ function handleVars() {
 			name=`echo ${var} | jq -r '.name // empty' | tr -d '\r'`
 			value=`echo ${var} | jq -r '.value // empty' | tr -d '\r'`
 			# https://stackoverflow.com/questions/9871458/declaring-global-variable-inside-a-function
-			printf -v "${name}" "${value}"
+			eval printf -v "${name}" "${value}"
 			export "${name}"
 			echo "[${index}] ${name}=${value}" >> ${runsDir}/vars.txt
 			htmlVars="${htmlVars} <tr><td>${index}</td><td>${name}</td><td>${value}</td></tr>"
@@ -140,7 +140,7 @@ function handleTestCases() {
 		command=`echo ${testCase} | jq -r '.command // empty' | tr -d '\r'`
 		teardown=`echo ${testCase} | jq -r '.teardown // empty' | tr -d '\r'`
 		exitCode=`echo ${testCase} | jq -r '.exitCode // empty' | tr -d '\r'`
-		errorPattern=`echo ${testCase} | jq -r '.errorPattern // empty' | tr -d '\r'`
+		outputPattern=`echo ${testCase} | jq -r '.outputPattern // empty' | tr -d '\r'`
 		# save test case to test case directory
 		echo ${testCase} > ${casesDir}/${number}.json
 		totalCount=$((${totalCount} + 1))
@@ -179,7 +179,7 @@ function handleTestCases() {
 			eval ${teardown} > ${runsDir}/${number}.teardown.1.txt 2> ${runsDir}/${number}.teardown.2.txt
 		fi
 		successExitCode=0
-		successErrorPattern=0
+		successoutputPattern=0
 		# calculate test result
 		if [[ -n ${exitCode} ]]
 		then
@@ -188,30 +188,36 @@ function handleTestCases() {
 				successExitCode=1
 			fi
 		fi
-		if [[ -n ${errorPattern} ]]
+		if [[ -n ${outputPattern} ]]
 		then
-			grep -q "${errorPattern}" ${runsDir}/${number}.test.2.txt
+			if [[ ${exitCode} -eq 0 ]]
+			then
+				grep -q "${outputPattern}" ${runsDir}/${number}.test.1.txt
+			else
+				grep -q "${outputPattern}" ${runsDir}/${number}.test.2.txt
+			fi
 			if [[ $? -ne 0 ]]
 			then
-				successErrorPattern=1
+				successoutputPattern=1
 			fi
 		fi
 		enddate=`date +"%d.%m.%Y %H:%M:%S"`
 		time=`timeconvert "${startdate}" "${enddate}"`
 		# print test result
-		if [[ ${successExitCode} -eq 0 ]] && [[ ${successErrorPattern} -eq 0 ]]
+		if [[ ${successExitCode} -eq 0 ]] && [[ ${successoutputPattern} -eq 0 ]]
 		then
 			printf "%-18s: %-7s %-7s [${startdate} - ${enddate}] ${description}\n" "TestCase[${index}]" "${number}" Success
-			htmlCases="${htmlCases} <tr><td>${index}</td><td>${number}</td><td><span class=\"success\">✓</span> Success</td><td><span class=\"tooltip\">${startdate} - ${enddate}<span class=\"right\">${time}</span></span></td><td><span class=\"tooltip\">${description} <span class=\"right\">${cmd}</span></span></td></tr>"
+			success="stdout: `cat ${runsDir}/${number}.test.1.txt`"
+			htmlCases="${htmlCases} <tr><td>${index}</td><td><span class="tooltip">${number}<span class="right">${testCase}</span></span></td><td><span class=\"tooltip\"><span class=\"success\">✓</span> Success<span class=\"right\">${success}</span></span></td><td><span class=\"tooltip\">${startdate} - ${enddate}<span class=\"right\">${time}</span></span></td><td><span class=\"tooltip\">${description} <span class=\"right\">${cmd}</span></span></td></tr>"
 			successCount=$((${successCount} + 1))
 		else
 			printf "%-18s: %-7s %-7s [${startdate} - ${enddate}] ${description}\n" "TestCase[${index}]" "${number}" Failed
 			# https://gist.github.com/JPvRiel/b337dfee8f273aac1332447ed1342304
 			# https://www.codeply.com/p/C8083WXo5Z
-			fail="`cat ${runsDir}/${number}.test.2.txt`"
+			fail="stderr: `cat ${runsDir}/${number}.test.2.txt`"
 			fail="${fail//$'\n'/<br>}"
-			fail="Exit Code: ${exitCodeGot}<br>${fail}"
-			htmlCases="${htmlCases} <tr><td>${index}</td><td>${number}</td><td><span class=\"tooltip\"><span class=\"failed\">✗</span> Failed<span class=\"right\">${fail}</span></span></td><td><span class=\"tooltip\">${startdate} - ${enddate}<span class=\"right\">${time}</span></span></td><td><span class=\"tooltip\">${description} <span class=\"right\">${cmd}</span></span></td></tr>"
+			fail="${fail}<br>exit-code: ${exitCodeGot}"
+			htmlCases="${htmlCases} <tr><td>${index}</td><td><span class="tooltip">${number}<span class="right">${testCase}</span></span></td><td><span class=\"tooltip\"><span class=\"failed\">✗</span> Failed<span class=\"right\">${fail}</span></span></td><td><span class=\"tooltip\">${startdate} - ${enddate}<span class=\"right\">${time}</span></span></td><td><span class=\"tooltip\">${description} <span class=\"right\">${cmd}</span></span></td></tr>"
 			failedCount=$((${failedCount} + 1))
 		fi
 	done

@@ -1,0 +1,53 @@
+{
+	"tests": {
+		"name": "Linux Tests",
+		"prerequisites": [
+			{
+				"description": "Create temp dir",
+				"command": "export tmpDir=$(mktemp -d -t bunit)"
+			}
+		],
+		"cases": [
+			{
+				"number": "FILE-COPY1",
+				"description": "Test copy file",
+				"setup": "echo 'Hello world' > $tmpDir/file1",
+				"command": "cp $tmpDir/file1 $tmpDir/file2 && ls $tmpDir/file1 $tmpDir/file2 && diff -q $tmpDir/file1 $tmpDir/file2",
+				"teardown": "rm $tmpDir/file1 $tmpDir/file2",
+				"exitCode": 0
+			},
+			{
+				"number": "FILE-LINK",
+				"description": "Test link file",
+				"setup": "echo 'Hello world' > $tmpDir/file1",
+				"command": "ln $tmpDir/file1 $tmpDir/file2 && ls -i $tmpDir/file1 $tmpDir/file2",
+				"teardown": "rm $tmpDir/file1 $tmpDir/file2",
+				"exitCode": 0
+			},
+			{
+				"number": "DIR-LINK",
+				"description": "Test link directory",
+				"setup": "mkdir $tmpDir/dir1",
+				"command": "ln $tmpDir/dir1 $tmpDir/dir2",
+				"teardown": "rm -rf $tmpDir/dir1",
+				"exitCode": 1
+			},
+			{
+				"number": "ECHO",
+				"description": "Test echo command",
+				"command": "echo hello world",
+				"exitCode": 0,
+				"outputPattern": "hello .*d"
+			},
+			{
+				"number": "DIR-LINK2",
+				"description": "Test link directory and verify error message",
+				"setup": "mkdir $tmpDir/dir1",
+				"command": "ln $tmpDir/dir1 $tmpDir/dir2",
+				"teardown": "rm -rf $tmpDir/dir1",
+				"exitCode": 1,
+				"outputPattern": "Is a directory"
+			}
+		]
+	}
+}
