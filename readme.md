@@ -218,8 +218,8 @@ Variables are published to the Bash environment when the test script is run, usi
 {
 	"number": "FILE-COPY1",
 	"description": "Test copy file",
-	"setup": "echo 'Hello world' > $tmpDir/$file1",
-	"command": "mkdir -p $tmpDir && cp $tmpDir/$file1 $tmpDir/$file2 && diff -q $tmpDir/$file1 $tmpDir/$file2",
+	"setup": "mkdir -p $tmpDir && echo 'Hello world' > $tmpDir/$file1",
+	"command": "cp $tmpDir/$file1 $tmpDir/$file2 && diff -q $tmpDir/$file1 $tmpDir/$file2",
 	"teardown": "rm -rf $tmpDir",
 	"exitCode": 0
 }
@@ -241,45 +241,51 @@ Variables can be used in all command sections of the Json test file
 
 ### Prerequisites
 
-Test requirements can be defined using "prerequisites". These tests are initially executed before all test cases are started.
+Test requirements can be defined using "prerequisites". These checks are executed initially before all test cases are started.
 
 ```json
 {
     ...
+    "vars": [
+        {
+            "name": "tempdir",
+            "value": "/tmp"
+        }
+    ],
 	"prerequisites": [
 		{
-			"description": "Create temp dir",
-			"command": "export tmpDir=$(mktemp -d -t bunit)"
+			"description": "Check temp dir",
+			"command": "ls $tempdir"
 		}
 	],
 	"cases": [
 		{
 			"number": "FILE-COPY1",
 			"description": "Test copy file",
-			"setup": "echo 'Hello world' > $tmpDir/file1",
-			"command": "cp $tmpDir/file1 $tmpDir/file2 && ls $tmpDir/file1 $tmpDir/file2 && diff -q $tmpDir/file1 $tmpDir/file2",
-			"teardown": "rm $tmpDir/file1 $tmpDir/file2",
+			"setup": "echo 'Hello world' > $tempdir/file1",
+			"command": "cp $tempdir/file1 $tempdir/file2 && diff -q $tempdir/file1 $tempdir/file2",
+			"teardown": "rm $tempdir/file1 $tempdir/file2",
 			"exitCode": 0
 		},
     ...
 }
 ```
 
-As with the test cases, the prerequisites execute commands and check the exit status. An exit status ≠ 0 is considered as failure, which terminates the test execution. In this case, the test prerequisites must be corrected in the test environment or the test must be adapted.
+As with the test case commands, the prerequisites commands are executed and their exit status is checked afterwards. An exit status ≠ 0 is considered as failure, which terminates the test whole execution. In this case, the test prerequisites must be corrected in the test environment or the prerequisite must be corrected.
 
 ## Reports
 
 The test script generates various artifacts and reports on each run:
 
-- a text report
-- an HTML report
-- details of the test cases and their execution
-- all variables with their name and value
-- a JSON file for each test case
-- the pre-requisite commands and their outputs (stdout and stderr)
-- setup commands of the test cases and their outputs (stdout and stderr) if available
-- the test commands of the test cases and their outputs (stdout and stderr)
-- teardown commands of the test cases and their outputs (stdout and stderr) if available
+- a text report file
+- an HTML report file
+- detail files of the test cases and their execution
+  - all variables file with their name and value
+  - a JSON file for each test case
+  - files for the the pre-requisite commands and their outputs (stdout and stderr)
+  - files for the setup commands of the test cases and their outputs (stdout and stderr) if available
+  - files for the the test commands of the test cases and their outputs (stdout and stderr)
+  - files for the teardown commands of the test cases and their outputs (stdout and stderr) if available
 - a zip file named with the timestamp of the execution, containing all the files mentioned above
 
 All files are written to a folder called "reports/latest".
@@ -290,9 +296,9 @@ The files "report.txt" and "report.html" contain the test results. The first fil
 
 In the subdirectory "cases" there is a JSON file for each test case. This can be helpful for the analysis.
 
-The folder "prereqs" contains files with the commands of the prerequisites and their outputs (stdout and stderr). If there are problems, these files can help.
+The folder "prereqs" contains files with the commands of the prerequisites and their outputs (stdout and stderr). If there are problems, these files can be examinated.
 
-The same git for the test execution. The folder "runs" contains files for the commands "setup", "teardown" and "command" and their outputs.
+The same files are created for the test execution. The folder "runs" contains files for the commands "setup", "teardown" and "command" and their outputs.
 
 A file with all variables "vars.txt" is also stored in this folder.
 
