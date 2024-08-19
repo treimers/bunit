@@ -35,8 +35,17 @@ function checkjq() {
 
 # convert time difference between two dates to hours-minutes-seconds
 function timeconvert() {
-	start=`date -jf "%d.%m.%Y %H:%M:%S" "$1" +%s`
-	end=`date -jf "%d.%m.%Y %H:%M:%S" "$2" +%s`
+	if [[ "$OSTYPE" == "darwin"* ]]
+	then
+		start=`date -jf "%Y-%m-%d %H:%M:%S" "$1" +%s`
+		end=`date -jf "%Y-%m-%d %H:%M:%S" "$2" +%s`
+	elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+		start=`date -d "$1" +%s`
+		end=`date -d "$2" +%s`
+	else
+	    echo "Unsupported OS: $OSTYPE"
+    exit 1
+	fi
 	diffSeconds="$(($end-$start))"
 	hours=$(($diffSeconds / 3600))
 	minutes=$((($diffSeconds / 60) % 60))
@@ -83,19 +92,19 @@ function handlePreReqs() {
 			command=`echo ${preReq} | jq -r '.command // empty' | tr -d '\r'`
 			cmd=`echo ${command} | envsubst`
 			echo ${cmd} > ${prereqsDir}/${index}.prerequisite.command.txt
-			startdate=`date +"%d.%m.%Y %H:%M:%S"`
+			startdate=`date +"%Y-%m-%d %H:%M:%S"`
 			if [[ -n ${command} ]]
 			then
 				if [[ ${skipPrerequisites} -eq 1 ]]
 				then
-					enddate=`date +"%d.%m.%Y %H:%M:%S"`
+					enddate=`date +"%Y-%m-%d %H:%M:%S"`
 					time=`timeconvert "${startdate}" "${enddate}"`
 					printf "%-18s: %-7s [${startdate} - ${enddate}] ${description}\n" "Pre-Requisite[${index}]" Skipped
 					htmlPreReqs="${htmlPreReqs} <tr><td>${index}</td><td><span class=\"skipped\">✓</span> Skipped</td><td><span class=\"tooltip\">${startdate} - ${enddate}<span class=\"right\">${time}</span></span></td><td><span class=\"tooltip\">${description}<span class=\"right\">${cmd}</span></span></td></tr>"
 				else
 					eval ${command} > ${prereqsDir}/${index}.prerequisite.1.txt 2> ${prereqsDir}/${index}.prerequisite.2.txt
 					exitCodeGot=$?
-					enddate=`date +"%d.%m.%Y %H:%M:%S"`
+					enddate=`date +"%Y-%m-%d %H:%M:%S"`
 					time=`timeconvert "${startdate}" "${enddate}"`
 					if [[ ${exitCodeGot} -eq 0 ]]
 					then
@@ -145,11 +154,11 @@ function handleTestCases() {
 		echo ${testCase} > ${casesDir}/${number}.json
 		totalCount=$((${totalCount} + 1))
 		# timestamp
-		startdate=`date +"%d.%m.%Y %H:%M:%S"`
+		startdate=`date +"%Y-%m-%d %H:%M:%S"`
 		# if test command is empty skip this test case
 		if [[ -z ${command} ]]
 		then
-			enddate=`date +"%d.%m.%Y %H:%M:%S"`
+			enddate=`date +"%Y-%m-%d %H:%M:%S"`
 			time=`timeconvert "${startdate}" "${enddate}"`
 			printf "%-18s: %-7s %-7s [${startdate} - ${enddate}] ${description}\n" "TestCase[${index}]" "${number}" Skipped
 			htmlCases="${htmlCases} <tr><td>${index}</td><td>${number}</td><td><span class=\"skipped\">↷</span> Skipped</td><td><span class=\"tooltip\">${startdate} - ${enddate}<span class=\"right\">${time}</span></span></td><td>${description}</td></tr>"
@@ -192,16 +201,16 @@ function handleTestCases() {
 		then
 			if [[ ${exitCode} -eq 0 ]]
 			then
-				grep -q "${outputPattern}" ${runsDir}/${number}.test.1.txt
+				grep -qE "${outputPattern}" ${runsDir}/${number}.test.1.txt
 			else
-				grep -q "${outputPattern}" ${runsDir}/${number}.test.2.txt
+				grep -qE "${outputPattern}" ${runsDir}/${number}.test.2.txt
 			fi
 			if [[ $? -ne 0 ]]
 			then
 				successoutputPattern=1
 			fi
 		fi
-		enddate=`date +"%d.%m.%Y %H:%M:%S"`
+		enddate=`date +"%Y-%m-%d %H:%M:%S"`
 		time=`timeconvert "${startdate}" "${enddate}"`
 		# print test result
 		if [[ ${successExitCode} -eq 0 ]] && [[ ${successoutputPattern} -eq 0 ]]

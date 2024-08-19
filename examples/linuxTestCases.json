@@ -4,13 +4,17 @@
 		"vars": [
 			{
 				"name": "dirpattern",
-				"value": "bunit"
+				"value": "bunit-XXXXXX"
 			}
 		],
 		"prerequisites": [
 			{
 				"description": "Create temp dir",
 				"command": "export tmpDir=$(mktemp -d -t $dirpattern)"
+			},
+			{
+				"description": "Create temp dir",
+				"command": "echo $tmpDir"
 			}
 		],
 		"cases": [
@@ -52,7 +56,7 @@
 				"command": "ln $tmpDir/dir1 $tmpDir/dir2",
 				"teardown": "rm -rf $tmpDir/dir1",
 				"exitCode": 1,
-				"outputPattern": "Is a directory"
+				"outputPattern": "Is a directory|hard link not allowed for directory"
 			}
 		]
 	}
