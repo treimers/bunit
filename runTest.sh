@@ -254,7 +254,7 @@ function createHtml() {
 	# http://www.menucool.com/tooltip/css-tooltip
 	# https://stackoverflow.com/questions/18517483/displaying-long-text-in-bootstrap-tooltip
 	envsubst < template.report.html > ${currDir}/report.html
-	cp -r resources/ ${currDir}
+	cp -r resources/* ${currDir}
 }
 
 # zip reports
